@@ -76,3 +76,160 @@ plot(el_salami, edge.arrow.size=.1, layout = layout_with_kk, main="Salamiparty")
 
 el_fem <- delete_vertices(el, V(el)[sex != "2"])
 plot(el_fem, edge.arrow.size=.1, layout = layout_with_kk, main="Frauens")
+
+########### Leas Skript ################
+
+# Edgelist laden
+
+# Funktion read.csv
+
+ag <- read.csv("edgelist_neu.csv", header=TRUE) # liest die Datei ein
+is.data.frame(ag) # prüft, ob ein is.data.frame vorliegt
+ag # zeigt den Datenframe an
+
+# Funktion graph.data.frame
+
+agi <- graph.data.frame(ag, directed = TRUE) # liest den Datenframe, braucht andere Bezeichnung als ag
+class(agi) #prüft, welches Format agi hat
+agi # zeigt igraph-Objekt an
+plot (agi)
+
+####################
+
+# Nodelist laden
+
+library(igraph)
+
+##
+
+getwd()
+# liest die Dateien direkt aus dem github-Verzeichnis ein
+ag <- read.csv("edgelist_neu.csv", header=T, as.is=T, sep = ",")
+nodes <- read.csv("Nodelist_verkuerzt.csv", header=T, as.is=T, sep = ",")
+# prüft, ob alle Variablen eingelesen wurden
+head(ag)
+head(nodes)
+# wandelt die edgelist in eine Matrix um und baut das igraph-Objekt
+hties <-as.matrix(ag)
+ag <- graph_from_data_frame(d=hties, vertices=nodes, directed=T)
+ag
+
+# ruft das finale igraph-Objekt auf.
+ag
+# einfache Visualisierung
+plot(ag)
+
+# Befehl in ingraph fuer Edge-Attribute
+
+edge_attr(ag)
+
+# Befehl in ingraph fuer Vertex-Attribute
+
+vertex_attr(ag)
+
+# Durchmesser
+diameter(ag)
+
+# Cluster
+
+gc <- cluster_walktrap(ag)
+modularity(gc)
+membership(gc)
+plot(gc, ag, edge.arrow.size=0.2)
+
+# degree-Berechnung
+
+# indegree
+
+degree(ag, mode = "in")
+
+# outdegree
+
+degree(ag, mode = "out")
+
+# Visualisierung nach indegrees
+
+E(ag)$arrow.size <- .2 # definiert die Pfeilspitze auf 2
+E(ag)$color="red" # definiert die Kantenfarbe auf schwarz
+E(ag)$width <- E(ag)$relation
+
+
+plot(ag, vertex.size=degree(ag, mode="in")*1, edge.arrow.size=.1, vertex.label = NA)
+
+# Visualisierung nach outdegrees
+
+plot(ag, vertex.size=degree(ag, mode="out")*1, edge.arrow.size=.1, vertex.label = NA)
+
+#Zentralisierter Eigenvector-Wert
+centr_eigen(ag, directed = FALSE)$centralization
+
+edge_attr(ag)
+vertex_attr(ag)
+
+# Teilnetzwerk erstellen, getrennt nach relation
+
+E(ag)[relation == 3] # Selektion des Attributs, nicht ausfuehren
+
+# Teilnetzwerk nur mit Links
+
+ag_links <- subgraph.edges(ag, E(ag)[relation == 1]) 
+plot (ag_links)
+
+# Teilnetzwerk nur mit Volltexten
+
+ag_volltext <- subgraph.edges(ag, E(ag)[relation == 3]) 
+plot (ag_volltext, vertex.label = NA, edge.arrow.size = .1)
+
+# Teilnetzwerk nur mit Teasern
+
+ag_teaser <- subgraph.edges(ag, E(ag)[relation == 2]) 
+plot (ag_teaser, vertex.label = NA, edge.arrow.size = .1)
+
+# Ego-Netzwerk mit achgut
+
+vachgut <- subgraph <- make_ego_graph(ag, order=1, c("achgut"))
+plot(vachgut[[1]], edge.arrow.size=.1)
+
+# Ego-Netzwerk mit Peter Grimm
+
+vpetergrimm <- subgraph <- make_ego_graph(ag, order=1, c("peter_grimm"))
+plot(vpetergrimm[[1]], edge.arrow.size=.1)
+
+# Ego-Netzwerk mit faktum_magazin
+
+vfaktum_magazin <- subgraph <- make_ego_graph(ag, order=1, c("faktum_magazin"))
+plot(vfaktum_magazin[[1]], edge.arrow.size=.1, edge.color="blue")
+
+# Ego-Netzwerk mit veralengsfeld
+
+vvera_lengsfeld <- subgraph <- make_ego_graph(ag, order=1, c("vera_lengsfeld"))
+plot(vvera_lengsfeld[[1]], edge.arrow.size=.1)
+
+# Dichte
+edge_density(ag)
+
+# Indegree-Maß
+degree(ag, mode = "in")
+
+# Outdegree-Maß
+degree(ag, mode = "out")
+
+#Zentralisierter Betweenness-Wert
+centr_betw(ag, directed = FALSE)$centralization
+
+# Teilnetzwerk nach Frauen (vertix-Attribut)
+
+ag_women <- delete_vertices(ag, V(ag)[sex!="2"])
+ag_women
+plot(ag_women, edge.arrow.size=.1, layout= layout_with_kk, main="Nur Frauen")
+
+# Teilnetzwerk nach Männern (vertix-Attribut)
+
+ag_men <- delete_vertices(ag, V(ag)[sex!="1"])
+ag_men
+plot(ag_men, edge.arrow.size=.1, layout= layout_with_kk, main="Nur Männer")
+
+# Betweenness
+
+betweenness(ag)
+edge_betweenness(ag)
